@@ -1,51 +1,60 @@
 from application import app, db
-from application.models import ToDo
-from flask import redirect, url_for, render_template
+from application.models import Todo
+from application.forms import TaskForm
+from flask import redirect, url_for, render_template, request
 
-@app.rout('/')
+@app.route('/')
 def index():
-    todo = ToDo.query.query.all()
+    todo = Todo.query.all()
     #empstr = ""
-    #for name in todo:
+    #for name in Todo:
         #empstr += f'{name} {name.completed} <br>'
 
     #return empstr
-    reteurn render_template("task.html", todos=todo)
+    return render_template('task.html', todos=todo)
 
 @app.route('/about')
 def about():
     return render_template("about.html")
 
-@app.route('/add/<name>')
-def add(name):
-    todo = ToDo(task = name)
-    db.session.add(todo)
-    db.session.commit()
-    return redirect(url_for('index'))
+@app.route('/add', methods = ['GET','POST'])
+def add():
+    form = TaskForm()
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            taskData = Todo(
+                task = form.task.data,
+                completed = form.completed.data
+            )
+            db.session.add(taskData)
+            db.session.commit()
+            return redirect(url_for('index'))
+    return render_template('addtask.html', form=form)
 
 @app.route('/complete/<name>')
 def complete(name):
-    todo = ToDo.query.filter_by(task=name).first()
+    todo = Todo.query.filter_by(task=name).first()
     todo.complete = True
     db.session.commit()
     return redirect(url_for('index'))
 
 @app.route('/incomplete/<name>')
 def incomplete(name):
-    todo = ToDo.query.filter_by(task=name).first()
+    todo = Todo.query.filter_by(task=name).first()
     todo.complete = False
     db.session.commit()
     return redirect(url_for('index'))
 
 @app.route('/update/<oldName>/<newName>')
 def update(name):
-    todo = ToDo.query.filter_by(task=oldName).first()
+    todo = Todo.query.filter_by(task=oldName).first()
     todo.task = newName
     db.session.commit()
     return redirect(url_for('index'))
 
-@app.route('/delete/<name>')
-def delete(name):
-    todo = ToDo.query.filter_by(task=name).first()
-    db.session.delete()
+@app.route('/delete/<int:id>')
+def delete(id):
+    todo = Todo.query.get(id)
+    db.session.delete(todo)
+    db.session.commit()
     return redirect(url_for('index'))
