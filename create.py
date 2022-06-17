@@ -1,11 +1,11 @@
 from application import db
-from application.models import ToDo
+from application.models import Todo
 from application import __init__
 
 db.drop_all()
 db.create_all()
 
-sample_todo = ToDo(
+sample_todo = Todo(
     task = "Sample todo",
     completed = False
 )
