@@ -45,12 +45,18 @@ def incomplete(name):
     db.session.commit()
     return redirect(url_for('index'))
 
-@app.route('/update/<oldName>/<newName>')
-def update(name):
-    todo = Todo.query.filter_by(task=oldName).first()
-    todo.task = newName
-    db.session.commit()
-    return redirect(url_for('index'))
+@app.route('/update/<int:id>>', methods = ['GET', 'POST'])
+def update(id):
+    form = TaskForm()
+    todo = Todo.query.get(id)
+    if form.validate_on_submit():
+        todo.task = form.task.data
+        db.session.commit()
+        return redirect(url_for('index'))
+    elif request.method = 'GET'
+        form.task.data = todo.task
+    return render_template('update.html', form=form)
+
 
 @app.route('/delete/<int:id>')
 def delete(id):
